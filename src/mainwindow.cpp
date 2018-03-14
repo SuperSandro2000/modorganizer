@@ -2211,6 +2211,36 @@ void MainWindow::renameMod_clicked()
 }
 
 
+void MainWindow::toggleMods_clicked()
+{	
+  QItemSelectionModel *selectionModel = ui->modList->selectionModel();
+  const QSortFilterProxyModel *proxyModel = qobject_cast<const QSortFilterProxyModel*>(selectionModel->model());
+  QList<QPersistentModelIndex> indices;
+  for (QModelIndex idx : selectionModel->selectedRows()) {
+	indices.append(idx);
+	qDebug("toggle %d", idx);
+  }
+
+  QModelIndex minRow, maxRow;
+  for (QModelIndex idx : indices) {
+	if (proxyModel != nullptr) {
+	  idx = proxyModel->mapToSource(idx);
+	}
+	if (!minRow.isValid() || (idx.row() < minRow.row())) {
+	  minRow = idx;
+	}
+	if (!maxRow.isValid() || (idx.row() > maxRow.row())) {
+	  maxRow = idx;
+	}
+	int oldState = idx.data(Qt::CheckStateRole).toInt();
+	qDebug("toggle %d", oldState);
+    //setData(idx, oldState == Qt::Unchecked ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+	m_OrganizerCore.pluginList()->setData(idx, oldState == Qt::Unchecked ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);	
+  }
+  //emit dataChanged(minRow, maxRow);
+}
+
+
 void MainWindow::restoreBackup_clicked()
 {
   QRegExp backupRegEx("(.*)_backup[0-9]*$");
@@ -3352,6 +3382,7 @@ void MainWindow::on_modList_customContextMenuRequested(const QPoint &pos)
         menu->addSeparator();
 
         menu->addAction(tr("Rename Mod..."), this, SLOT(renameMod_clicked()));
+        menu->addAction(tr("Toggle Mods"), this, SLOT(toggleMods_clicked()));
         menu->addAction(tr("Reinstall Mod"), this, SLOT(reinstallMod_clicked()));
 		menu->addAction(tr("Remove Mod..."), this, SLOT(removeMod_clicked()));
 

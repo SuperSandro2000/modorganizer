@@ -395,6 +395,7 @@ private slots:
   void createEmptyMod_clicked();
   void restoreBackup_clicked();
   void renameMod_clicked();
+  void toggleMods_clicked();
   void removeMod_clicked();
   void reinstallMod_clicked();
   void endorse_clicked();
