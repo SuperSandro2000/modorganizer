@@ -455,9 +455,16 @@ void DownloadManager::addNXMDownload(const QString &url)
   qDebug("add nxm download: %s", qPrintable(url));
   if (nxmInfo.game().compare(managedGame, Qt::CaseInsensitive) != 0) {
     qDebug("download requested for wrong game (game: %s, url: %s)", qPrintable(managedGame), qPrintable(nxmInfo.game()));
-    QMessageBox::information(nullptr, tr("Wrong Game"), tr("The download link is for a mod for \"%1\" but this instance of MO "
-    "has been set up for \"%2\".").arg(nxmInfo.game()).arg(managedGame), QMessageBox::Ok);
-    return;
+    int ret = QMessageBox::question(nullptr, tr("Wrong Game"), tr("The download link is for a mod for \"%1\" but this instance of MO "
+              "has been set up for \"%2\". Download the mod anyway?").arg(nxmInfo.game()).arg(managedGame),
+              QMessageBox::Discard, QMessageBox::Ok);
+
+    switch (ret) {
+    case QMessageBox::Ok:
+        break;
+    default:
+        return;
+    }
   }
 
   emit aboutToUpdate();
@@ -1263,8 +1270,9 @@ int DownloadManager::startDownloadURLs(const QStringList &urls)
 
 int DownloadManager::startDownloadNexusFile(int modID, int fileID)
 {
+  NXMUrl nxmInfo(url);
   int newID = m_ActiveDownloads.size();
-  addNXMDownload(QString("nxm://%1/mods/%2/files/%3").arg(m_ManagedGame->gameShortName()).arg(modID).arg(fileID));
+  addNXMDownload(QString("nxm://%1/mods/%2/files/%3").arg(nxmInfo.game()).arg(modID).arg(fileID));
   return newID;
 }
 
